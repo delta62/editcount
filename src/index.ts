@@ -22,6 +22,8 @@ let args: Args = yargs
 
 // stream which emits commit hashes
 commitStream(args)
-  .subscribe((data) => {
-    console.log('data', data)
-  })
+  .subscribe(
+    data => console.log('data', data),
+    err => console.error(err),
+    () => console.log('done')
+  )

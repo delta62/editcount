@@ -11,6 +11,7 @@ export default function commitStream(progArgs: Args): Observable<string> {
 
   return new Observable(subscriber => {
     let buffer = ''
+    let errBuffer = ''
     let proc = spawn('git', args, opts)
 
     proc.stdout.on('data', data => {
@@ -21,9 +22,13 @@ export default function commitStream(progArgs: Args): Observable<string> {
       }
     })
 
+    proc.stderr.on('data', data => {
+      errBuffer += data
+    })
+
     proc.on('close', code => {
       if (code !== 0) {
-        subscriber.error(new Error(`Process exited with code ${code}`))
+        subscriber.error(new Error(`Process exited with code ${code}\n${errBuffer}`))
       }
       subscriber.complete()
     })
