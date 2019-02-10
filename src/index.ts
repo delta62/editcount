@@ -1,6 +1,10 @@
 import yargs from 'yargs'
-import commitStream from './streams/commit'
 import Args from './args'
+
+import { tap, flatMap, map } from 'rxjs/operators'
+
+import commitStream from './streams/commit'
+import diffStream from './streams/diff'
 
 let args: Args = yargs
   .option('cwd', {
@@ -20,10 +24,32 @@ let args: Args = yargs
   .help()
   .argv
 
-// stream which emits commit hashes
-commitStream(args)
+// stream which emits commit diffs
+let diffs = commitStream(args)
+  .pipe(flatMap(hash => diffStream(args, hash)))
+//   .pipe(map(getCommitEdits))
   .subscribe(
-    data => console.log('data', data),
-    err => console.error(err),
-    () => console.log('done')
+    console.log.bind(console),
+    err => console.error(err)
   )
+
+interface FileChanges {
+  file: string
+  additions: number
+  deletions: number
+}
+
+interface CommitChanges {
+  commit: string
+  author: string
+  timestamp: number
+  edits: Record<string, FileChanges>
+}
+
+// function getCommitEdits(diff: string): CommitChanges {
+//   let filename = ''
+// }
+//
+// function getFileEdits(diff: string): FileChanges {
+//
+// }

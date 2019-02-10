@@ -2,18 +2,17 @@ import { Observable } from 'rxjs'
 import { execFile } from 'child_process'
 import Args from '../args'
 
-export default function commitStream(progArgs: Args): Observable<string> {
+export default function diffStream(progArgs: Args, hash: string): Observable<string> {
   return new Observable(subscriber => {
     execFile(
       'git',
-      [ 'rev-list', `^${progArgs.from}`, `${progArgs.to}` ],
+      [ 'diff', `${hash}^`, `${hash}` ],
       { cwd: progArgs.cwd, timeout: 2 },
       (err, stdout, stderr) => {
         if (err) {
           subscriber.error(err)
         } else {
-          let lines = stdout.split('\n').filter(line => line.length)
-          lines.forEach(subscriber.next.bind(subscriber))
+          subscriber.next(stdout)
           subscriber.complete()
         }
       }
