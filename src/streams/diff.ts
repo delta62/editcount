@@ -6,9 +6,9 @@ export default function diffStream(progArgs: Args, hash: string): Observable<str
   return new Observable(subscriber => {
     execFile(
       'git',
-      [ 'diff', `${hash}^`, `${hash}` ],
-      { cwd: progArgs.cwd, timeout: 2 },
-      (err, stdout) => {
+      [ 'show', '--format=%H%+ae%+an%+at', hash ],
+      { cwd: progArgs.cwd, timeout: 5 },
+      (err, stdout, stderr) => {
         if (err) {
           subscriber.error(err)
         } else {

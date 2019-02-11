@@ -1,5 +1,5 @@
 import yargs from 'yargs'
-import { concatMap, flatMap, map, tap } from 'rxjs/operators'
+import { concatAll, concatMap, flatMap, map, tap } from 'rxjs/operators'
 
 import Args from './args'
 import revListStream from './streams/commit'
@@ -26,9 +26,11 @@ let args: Args = yargs
   .argv
 
 revListStream(args)
-  .pipe(flatMap(hash => diffStream(args, hash)))
-  .pipe(concatMap(getCommitFiles))
-  .pipe(map(getFileChanges))
+  .pipe(map(hash => diffStream(args, hash)))
+  .pipe(concatAll())
+  // .pipe(tap(console.log.bind(console)))
+  .pipe(flatMap(getCommitFiles))
+  // .pipe(map(getFileChanges))
   .subscribe(
     console.log.bind(console),
     err => console.error(err)
