@@ -1,10 +1,11 @@
 import yargs from 'yargs'
-import { concatAll, concatMap, flatMap, map, tap } from 'rxjs/operators'
+import { concat, from } from 'rxjs'
+import { concatAll, flatMap, map } from 'rxjs/operators'
 
 import Args from './args'
 import revListStream from './streams/commit'
 import diffStream from './streams/diff'
-import { FileDiff, getCommitFiles } from './transforms/diff-files'
+import { getCommitFiles } from './transforms/diff-files'
 
 let args: Args = yargs
   .option('cwd', {
@@ -24,11 +25,17 @@ let args: Args = yargs
   .help()
   .argv
 
-revListStream(args)
+let fileStream = revListStream(args)
   .pipe(map(hash => diffStream(args, hash)))
   .pipe(concatAll())
   .pipe(flatMap(getCommitFiles))
+
+let fileStrings = fileStream.pipe(map(obj => JSON.stringify(obj)))
+let openArrayStream = from([ '[' ])
+let closeArrayStream = from([ ']' ])
+
+concat(openArrayStream, fileStrings, closeArrayStream)
   .subscribe(
-    console.log.bind(console),
-    err => console.error(err)
+    process.stdout.write.bind(process.stdout),
+    console.error.bind(console)
   )

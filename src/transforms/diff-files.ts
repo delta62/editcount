@@ -32,7 +32,6 @@ export function getCommitFiles(diff: string): Observable<FileDiff> {
 
   let plusFile: string | null = null
   let minusFile: string | null = null
-  let lineMatches
 
   // Parse diff lines
   for (let line of ls) {
