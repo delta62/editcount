@@ -68,11 +68,15 @@ export function getCommitFiles(diff: string): Observable<FileDiff> {
       }
       if (matches = line.match(/^\+\+\+ (.*)$/)) {
         plusFile = matches[1]
-        curDiff.isDeleted = plusFile === '/dev/null'
+        if (!curDiff.isDeleted) {
+          curDiff.isDeleted = plusFile === '/dev/null'
+        }
       }
       if (matches = line.match(/^--- (.*)$/)) {
         minusFile = matches[1]
-        curDiff.isDeleted = minusFile === '/dev/null'
+        if (!curDiff.isDeleted) {
+          curDiff.isCreated = minusFile === '/dev/null'
+        }
       }
     }
   }
