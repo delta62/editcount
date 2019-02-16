@@ -7,7 +7,12 @@ export interface FileDiff {
   authorEmail: string
   timestamp: number
   filename: string
-  lines: string[]
+  isCreated: boolean
+  isDeleted: boolean
+  additions: number
+  deletions: number
+  additionLines: string[]
+  deletionLines: string[]
 }
 
 const DIFF_HEADER = /diff --git (\S+) (\S+)/
@@ -16,15 +21,25 @@ export function getCommitFiles(diff: string): Observable<FileDiff> {
   let ret: FileDiff[] = [ ]
   let ls = lines(diff)
   let curDiff: FileDiff | null = null
+
+  // Parse header
+
   let hash = ls[0]
   let authorEmail = ls[1]
   let authorName = ls[2]
   let timestamp = parseInt(ls[3])
   ls = ls.slice(5)
 
+  let plusFile: string | null = null
+  let minusFile: string | null = null
+  let lineMatches
+
+  // Parse diff lines
   for (let line of ls) {
     let matches = line.match(DIFF_HEADER)
     if (matches) {
+      plusFile = null
+      minusFile = null
       if (curDiff) {
         ret.push(curDiff)
       }
@@ -33,11 +48,32 @@ export function getCommitFiles(diff: string): Observable<FileDiff> {
         authorName: authorName,
         authorEmail: authorEmail,
         timestamp: timestamp,
-        filename: matches[1],
-        lines: [ line ]
+        filename: matches[1].substring(2),
+        isCreated: false,
+        isDeleted: false,
+        additions: 0,
+        deletions: 0,
+        additionLines: [ ],
+        deletionLines: [ ]
       }
     } else if (curDiff) {
-      curDiff.lines.push(line)
+      if (plusFile != null && minusFile != null) {
+        if (/^\+/.test(line)) {
+          curDiff.additions++
+          curDiff.additionLines.push(line)
+        } else if (/^-/.test(line)) {
+          curDiff.deletions++
+          curDiff.deletionLines.push(line)
+        }
+      }
+      if (matches = line.match(/^\+\+\+ (.*)$/)) {
+        plusFile = matches[1]
+        curDiff.isDeleted = plusFile === '/dev/null'
+      }
+      if (matches = line.match(/^--- (.*)$/)) {
+        minusFile = matches[1]
+        curDiff.isDeleted = minusFile === '/dev/null'
+      }
     }
   }
 
