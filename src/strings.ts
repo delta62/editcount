@@ -8,5 +8,9 @@ export function lines(str: string) {
     nextStart = nextEnd + 1
   }
 
+  if (nextStart !== str.length) {
+    ret.push(str.substring(nextStart, str.length))
+  }
+
   return ret
 }
