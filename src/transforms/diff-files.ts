@@ -11,11 +11,11 @@ export interface FileDiff {
   isDeleted: boolean
   additions: number
   deletions: number
-  additionLines: string[]
-  deletionLines: string[]
+  addedLines: string[]
+  deletedLines: string[]
 }
 
-const DIFF_HEADER = /diff --git (\S+) (\S+)/
+const DIFF_HEADER = /^diff --git (\S+) (\S+)/
 
 export function getCommitFiles(diff: string): Observable<FileDiff> {
   let ret: FileDiff[] = [ ]
@@ -52,17 +52,17 @@ export function getCommitFiles(diff: string): Observable<FileDiff> {
         isDeleted: false,
         additions: 0,
         deletions: 0,
-        additionLines: [ ],
-        deletionLines: [ ]
+        addedLines: [ ],
+        deletedLines: [ ]
       }
     } else if (curDiff) {
       if (plusFile != null && minusFile != null) {
         if (/^\+/.test(line)) {
           curDiff.additions++
-          curDiff.additionLines.push(line)
+          curDiff.addedLines.push(line)
         } else if (/^-/.test(line)) {
           curDiff.deletions++
-          curDiff.deletionLines.push(line)
+          curDiff.deletedLines.push(line)
         }
       }
       if (matches = line.match(/^\+\+\+ (.*)$/)) {
