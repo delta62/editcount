@@ -1,4 +1,4 @@
-const { lines } = require('../src/strings')
+const { lines } = require('../lib/strings')
 
 describe('string utils', () => {
   test('returns an empty array for an empty string', () => {

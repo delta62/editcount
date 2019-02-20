@@ -5,7 +5,7 @@ describe('execStream', () => {
   let execStream
 
   beforeEach(() => {
-    execStream = require('../../src/streams/exec').default
+    execStream = require('../../lib/streams/exec').default
   })
 
   test('invokes the given command', done => {
