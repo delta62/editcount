@@ -6,7 +6,15 @@ import Args from '../args'
 
 const DIFF_MATCHER = /^diff --git.*\n]$/
 
-export default function diffStream(progArgs: Args, hash: string): Observable<string> {
+export interface FileChange {
+  hash: string
+  authorName: string
+  authorEmail: string
+  timestamp: number
+  file: string
+}
+
+export default function diffStream(progArgs: Args, hash: string): Observable<FileChange> {
   let args = [ 'show', '--format=%H%+ae%+an%+at', hash ]
   let opts = { cwd: progArgs.cwd, timeout: 5 }
   return (execStream('git', args, opts) as Observable<string>)
@@ -14,6 +22,17 @@ export default function diffStream(progArgs: Args, hash: string): Observable<str
 }
 
 function mapDiffFiles(diff: string) {
-  let matches = diff.split(DIFF_MATCHER)
-  return from(matches || [ ])
+  let { header, changes } = parseHeader(diff)
+  let chunks = changes.split(DIFF_MATCHER)
+    .map(file => ({ ...header, file }))
+  return from(chunks)
+}
+
+function parseHeader(diff: string) {
+  let pieces = diff.split('\n')
+  let [ hash, authorEmail, authorName, ts ] = pieces
+  let changes = pieces.slice(4).join('\n')
+  let timestamp = parseInt(ts) * 1000
+  let header = { hash, authorName, authorEmail, timestamp }
+  return { header, changes }
 }
