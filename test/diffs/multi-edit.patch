@@ -1,0 +1,33 @@
+621cc3b0d2fe11f6ac7d6f980c5aba9591d171bf
+sam.noedel@gmail.com
+Sam Noedel
+1549754966
+
+diff --git a/src/index.ts b/src/index.ts
+index f363817..0026f68 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -22,6 +22,8 @@ let args: Args = yargs
+
+ // stream which emits commit hashes
+ commitStream(args)
+-  .subscribe((data) => {
+-    console.log('data', data)
+-  })
++  .subscribe(
++    data => console.log('data', data),
++    err => console.error(err),
++    () => console.log('done')
++  )
+diff --git a/src/streams/commit.ts b/src/streams/commit.ts
+index 8fbe46b..fd66e9d 100644
+--- a/src/streams/commit.ts
++++ b/src/streams/commit.ts
+@@ -11,6 +11,7 @@ export default function commitStream(progArgs: Args): Observable<string> {
+
+   return new Observable(subscriber => {
+     let buffer = ''
++    let errBuffer = ''
+     let proc = spawn('git', args, opts)
+
+     proc.stdout.on('data', data => {

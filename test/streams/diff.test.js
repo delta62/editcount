@@ -1,6 +1,6 @@
 require('../matchers/single-obs')
-const { bindNodeCallback } = require('rxjs')
-const { readFile } = require('fs')
+const { from } = require('rxjs')
+const { readFileSync } = require('fs')
 const path = require('path')
 
 jest.mock('../../lib/streams/exec')
@@ -15,43 +15,78 @@ describe('diffStream', () => {
   })
 
   test('should emit for a created file', async () => {
-    setDiffResult('add.patch')
+    let expected = setDiffResult('add.patch')
     await expect(diffStream({ })).toBeSingletonObservable({
       authorName: 'Sam Noedel',
       authorEmail: 'sam.noedel@gmail.com',
       hash: '8a6b02108fc1ff9feb30a6c0405fca9600f9a4a6',
       timestamp: 1549753267000,
-      file: `diff --git a/.gitignore b/.gitignore
-new file mode 100644
-index 0000000..f5f2ba6
---- /dev/null
-+++ b/.gitignore
-@@ -0,0 +1,2 @@
-+node_modules/
-+*.js
-`
+      file: expected
     })
   })
 
-  // test('should emit for a deleted file', done => {
-  //   done(new Error('Not implemented'))
-  // })
+  test('should emit for a deleted file', async () => {
+    let expected = setDiffResult('remove.patch')
+    await expect(diffStream({ })).toBeSingletonObservable({
+      authorName: 'Sam Noedel',
+      authorEmail: 'sam.noedel@gmail.com',
+      hash: '77f0f8024f485127cbe6336d891cc622b5e99b1e',
+      timestamp: 1550645429000,
+      file: expected
+    })
+  })
 
-  // test('should emit for an edited file', done => {
-  //   done(new Error('Not implemented'))
-  // })
+  test('should not emit for a renamed file', async() => {
+    let expected = setDiffResult('rename.patch')
+    await expect(diffStream({ })).toBeSingletonObservable({
+      authorName: 'Sam Noedel',
+      authorEmail: 'sam.noedel@gmail.com',
+      hash: '77f0f8024f485127cbe6336d891cc622b5e99b1e',
+      timestamp: 1550645429000,
+      file: expected
+    })
+  })
 
-  // test('should emit for a file with spaces in the filename', done => {
-  //   done(new Error('Not implemented'))
-  // })
+  test('should emit for an edited file', async () => {
+    let expected = setDiffResult('edit.patch')
+    await expect(diffStream({ })).toBeSingletonObservable({
+      authorName: 'Sam Noedel',
+      authorEmail: 'sam.noedel@gmail.com',
+      hash: '621cc3b0d2fe11f6ac7d6f980c5aba9591d171bf',
+      timestamp: 1549754966000,
+      file: expected
+    })
+  })
 
-  // test('should emit for multiple file edits', done => {
-  //   done(new Error('Not implemented'))
-  // })
+  test('should emit for a file with spaces in the filename', async () => {
+    let expected = setDiffResult('spaces.patch')
+    await expect(diffStream({ })).toBeSingletonObservable({
+      authorName: 'Sam Noedel',
+      authorEmail: 'sam.noedel@gmail.com',
+      hash: '621cc3b0d2fe11f6ac7d6f980c5aba9591d171bf',
+      timestamp: 1549754966000,
+      file: expected
+    })
+  })
+
+  test('should emit for multiple file edits', async () => {
+    let expected = setDiffResult('multi-edit.patch')
+    await expect(diffStream({ })).toBeSingletonObservable({
+      authorName: 'Sam Noedel',
+      authorEmail: 'sam.noedel@gmail.com',
+      hash: '621cc3b0d2fe11f6ac7d6f980c5aba9591d171bf',
+      timestamp: 1549754966000,
+      file: expected
+    })
+  })
 })
 
 function setDiffResult(diff) {
   let diffPath = path.join(__dirname, '..', 'diffs', diff)
-  let diffStream = bindNodeCallback(readFile)(diffPath, { encoding: 'utf8' })
+  let fileContents = readFileSync(diffPath, { encoding: 'utf8' })
+  let diffStream = from([ fileContents ])
   exec.mockReturnValue(diffStream)
+
+  let breakIdx = fileContents.indexOf('\n\n')
+  return breakIdx === -1 ? null : fileContents.substring(breakIdx)
 }

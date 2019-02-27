@@ -1,0 +1,9 @@
+77f0f8024f485127cbe6336d891cc622b5e99b1e
+sam.noedel@gmail.com
+Sam Noedel
+1550645429
+
+diff --git a/src/args.ts b/lib/args.ts
+similarity index 100%
+rename from src/args.ts
+rename to lib/args.ts

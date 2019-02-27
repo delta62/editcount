@@ -1,0 +1,14 @@
+77f0f8024f485127cbe6336d891cc622b5e99b1e
+sam.noedel@gmail.com
+Sam Noedel
+1550645429
+
+diff --git a/bin/index.js b/bin/index.js
+deleted file mode 100755
+index 8fd6814..0000000
+--- a/bin/index.js
++++ /dev/null
+@@ -1,3 +0,0 @@
+-#!/usr/bin/env node
+-
+-require('../src/index.js')
