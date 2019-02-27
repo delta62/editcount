@@ -9,7 +9,7 @@ const exec = require('../../lib/streams/exec').default
 const diffStream = require('../../lib/streams/diff').default
 
 describe('diffStream', () => {
-  test('should emit for an empty commit', async () => {
+  test('should not emit for an empty commit', async () => {
     setDiffResult('empty.patch')
     await expect(diffStream({ })).toBeEmptyObservable()
   })
@@ -87,6 +87,6 @@ function setDiffResult(diff) {
   let diffStream = from([ fileContents ])
   exec.mockReturnValue(diffStream)
 
-  let breakIdx = fileContents.indexOf('\n\n')
+  let breakIdx = fileContents.indexOf('\n\n') + 2
   return breakIdx === -1 ? null : fileContents.substring(breakIdx)
 }
