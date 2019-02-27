@@ -1,5 +1,5 @@
 import { Observable, from } from 'rxjs'
-import { flatMap } from 'rxjs/operators'
+import { filter, flatMap } from 'rxjs/operators'
 
 import execStream from './exec'
 import Args from '../args'
@@ -19,6 +19,7 @@ export default function diffStream(progArgs: Args, hash: string): Observable<Fil
   let opts = { cwd: progArgs.cwd, timeout: 5 }
   return (execStream('git', args, opts) as Observable<string>)
     .pipe(flatMap(mapDiffFiles))
+    .pipe(filter(x => !!x.file))
 }
 
 function mapDiffFiles(diff: string) {
@@ -31,7 +32,7 @@ function mapDiffFiles(diff: string) {
 function parseHeader(diff: string) {
   let pieces = diff.split('\n')
   let [ hash, authorEmail, authorName, ts ] = pieces
-  let changes = pieces.slice(4).join('\n')
+  let changes = pieces.slice(5).join('\n')
   let timestamp = parseInt(ts) * 1000
   let header = { hash, authorName, authorEmail, timestamp }
   return { header, changes }

@@ -1,0 +1,13 @@
+8a6b02108fc1ff9feb30a6c0405fca9600f9a4a6
+sam.noedel@gmail.com
+Sam Noedel
+1549753267
+
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..f5f2ba6
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,2 @@
++node_modules/
++*.js
