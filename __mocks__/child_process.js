@@ -8,7 +8,7 @@ function __setMockResults(err, stdout, stderr) {
 
 function execFile(cmd, args, opts, cb) {
   let { err, stdout, stderr } = mockResults
-  cb(err, stdout, stderr)
+  setTimeout(() => cb(err, stdout, stderr))
 }
 
 child_process.execFile = jest.fn(execFile)
