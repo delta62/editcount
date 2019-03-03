@@ -2,7 +2,7 @@
   "name": "editcount",
   "version": "1.0.0",
   "scripts": {
-    "start": "tsc -w",
+    "start": "jest --watch",
     "test": "jest"
   },
   "license": "MIT",

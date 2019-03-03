@@ -1,6 +1,6 @@
 const diff = require('jest-diff')
-const { isObservable } = require('rxjs')
-const { isEmpty, single } = require('rxjs/operators')
+const { from, isObservable, zip } = require('rxjs')
+const { isEmpty, map, reduce, single } = require('rxjs/operators')
 
 expect.extend({
   async toBeSingletonObservable(actual, expected) {
@@ -48,15 +48,38 @@ expect.extend({
       }
     }
 
-    let options = {
-      isNot: this.isNot,
-      promise: this.promise
-    }
     let pass = await actual.pipe(isEmpty()).toPromise()
     let message = pass
       ? 'Observable was empty'
       : 'Observable was not empty'
     return { message: () => message, pass }
+  },
+
+  async toBeObservableWith(actual, expected) {
+    expected = from(expected)
+    if (!isObservable(actual)) {
+      return {
+        message: () => 'toBeEmptyObservable called with a non-observable value',
+        pass: false
+      }
+    }
+
+    let errorString = await zip(actual, expected)
+      .pipe(reduce((acc, [ x, y ]) => {
+        if (acc) return acc
+        if (this.equals(x, y)) {
+          return ''
+        } else {
+          return `expected ${x} to equal ${y}`
+        }
+      }, ''))
+      .toPromise()
+
+    let message = errorString
+      ? errorString
+      : 'All observable values were equal'
+
+    return { message: () => message, pass: !errorString }
   }
 })
 
