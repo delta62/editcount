@@ -1,84 +1,64 @@
-import { Observable, from } from 'rxjs'
-import { lines } from '../strings'
+import { Observable, from, zip } from 'rxjs'
+import { flatMap, map, partition, reduce, takeUntil } from 'rxjs/operators'
+import { lines as getLines } from '../strings'
 
-export interface FileDiff {
-  commit: string
+interface DiffHeader {
+  hash: string
   authorName: string
   authorEmail: string
   timestamp: number
+}
+
+interface FileHeader {
   filename: string
   isCreated: boolean
   isDeleted: boolean
-  additions: number
-  deletions: number
-  addedLines: string[]
-  deletedLines: string[]
 }
 
-const DIFF_HEADER = /^diff --git (\S+) (\S+)/
+interface DiffFile extends FileHeader {
+  contents: string[]
+}
+
+export type FileDiff = DiffHeader & DiffFile
+
+const DIFF_HEADER = /^diff --git (?:a\/|\/dev\/null)(.*) (?:b\/|\/dev\/null)(.*)$/
+const DEVNULL = '/dev/null'
 
 export function getCommitFiles(diff: string): Observable<FileDiff> {
-  let ret: FileDiff[] = [ ]
-  let ls = lines(diff)
-  let curDiff: FileDiff | null = null
+  let lines = getLines(diff)
 
   // Parse header
+  let [ hash, authorEmail, authorName, timestamp, ...bodyLines ] = lines
 
-  let hash = ls[0]
-  let authorEmail = ls[1]
-  let authorName = ls[2]
-  let timestamp = parseInt(ls[3])
-  ls = ls.slice(5)
+  // Emits a single value; this diff's header
+  let headerStream = from([ { hash, authorEmail, authorName, timestamp: parseInt(timestamp) } ])
 
-  let plusFile: string | null = null
-  let minusFile: string | null = null
+  // Emits each line of the diff
+  let diffStream = from(bodyLines)
 
-  // Parse diff lines
-  for (let line of ls) {
-    let matches = line.match(DIFF_HEADER)
-    if (matches) {
-      plusFile = null
-      minusFile = null
-      if (curDiff) {
-        ret.push(curDiff)
-      }
-      curDiff = {
-        commit: hash,
-        authorName: authorName,
-        authorEmail: authorEmail,
-        timestamp: timestamp,
-        filename: matches[1].substring(2),
-        isCreated: false,
-        isDeleted: false,
-        additions: 0,
-        deletions: 0,
-        addedLines: [ ],
-        deletedLines: [ ]
-      }
-    } else if (curDiff) {
-      if (plusFile != null && minusFile != null) {
-        if (/^\+/.test(line)) {
-          curDiff.additions++
-          curDiff.addedLines.push(line)
-        } else if (/^-/.test(line)) {
-          curDiff.deletions++
-          curDiff.deletedLines.push(line)
-        }
-      }
-      if (matches = line.match(/^\+\+\+ (.*)$/)) {
-        plusFile = matches[1]
-        if (!curDiff.isDeleted) {
-          curDiff.isDeleted = plusFile === '/dev/null'
-        }
-      }
-      if (matches = line.match(/^--- (.*)$/)) {
-        minusFile = matches[1]
-        if (!curDiff.isDeleted) {
-          curDiff.isCreated = minusFile === '/dev/null'
-        }
-      }
-    }
-  }
+  // headersStream emits whenever a diff header is found
+  // linesStream emits whenever a non-diff-header line is found
+  let [ headerLineStream, linesStream ] = partition(DIFF_HEADER.test)(diffStream)
 
-  return from(ret)
+  let fileHeadersStream = headerLineStream
+    .pipe(map(mapHeaderLine))
+
+  let filesStream = fileHeadersStream
+    .pipe(flatMap((header: FileHeader) => {
+      return linesStream
+        .pipe(takeUntil(fileHeadersStream))
+        .pipe(reduce((acc: string[], x: string) => [ ...acc, x ]))
+        .pipe(map(lines => ({ ...header, contents: lines })))
+    }))
+
+  return zip(headerStream, filesStream)
+    .pipe(map(([ header, file ]) => ({ ...header, ...file })))
+}
+
+function mapHeaderLine(header: string): FileHeader {
+  let [ , aFile, bFile ] = header.match(DIFF_HEADER)!
+  let isCreated = aFile === DEVNULL
+  let isDeleted = bFile === DEVNULL
+  let filename = isDeleted ? aFile : bFile
+  return { isCreated, isDeleted, filename }
 }
