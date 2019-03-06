@@ -3,16 +3,9 @@ import { filter, flatMap } from 'rxjs/operators'
 
 import execStream from './exec'
 import Args from '../args'
+import { FileChange } from '../models'
 
-const DIFF_MATCHER = /^diff --git.*\n]$/
-
-export interface FileChange {
-  hash: string
-  authorName: string
-  authorEmail: string
-  timestamp: number
-  file: string
-}
+const DIFF_MATCHER = /^diff --git.*\n$/
 
 export default function diffStream(progArgs: Args, hash: string): Observable<FileChange> {
   let args = [ 'show', '--format=%H%+ae%+an%+at', hash ]

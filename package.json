@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "start": "jest --watch",
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "license": "MIT",
   "devDependencies": {
