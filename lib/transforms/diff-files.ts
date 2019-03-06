@@ -2,6 +2,8 @@ import { lines as getLines } from '../strings'
 import { FileChange, FileDiff } from '../models'
 
 const DEVNULL = '/dev/null'
+const TRIPLE_PLUS = new RegExp("^\+\+\+ (?:(?:a|b)/)?(.*)$")
+const TRIPLE_MINUS = new RegExp("^--- (?:(?:a|b)/)?(.*)$")
 
 export default function getDiffFiles(diff: FileChange): FileDiff {
   let seed = {
@@ -16,9 +18,9 @@ export default function getDiffFiles(diff: FileChange): FileDiff {
   let fileStats = getLines(diff.file)
     .reduce((acc, line) => {
       let matches
-      if (matches = line.match(/^+++ (.*)/)) {
+      if (matches = line.match(TRIPLE_PLUS)) {
         acc.plusFile = matches[1]
-      } else if (matches = line.match(/^--- (.*)/)) {
+      } else if (matches = line.match(TRIPLE_MINUS)) {
         acc.minusFile = matches[1]
       } else if (/^+/.test(line)) {
         acc.additions++
