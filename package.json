@@ -1,6 +1,6 @@
 {
-  "name": "editcount",
-  "version": "1.0.0",
+  "name": "@noedel/editcount",
+  "version": "1.0.0-alpha1",
   "scripts": {
     "start": "jest --watch",
     "test": "jest",
