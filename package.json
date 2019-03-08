@@ -7,12 +7,17 @@
     "build": "tsc"
   },
   "license": "MIT",
+  "repository": "delta62/editcount",
   "devDependencies": {
     "@types/node": "^11.9.5",
     "jest": "^24.1.0",
     "ts-jest": "^24.0.0",
     "typescript": "^3.3.3"
   },
+  "files": [
+    "bin/**/*.js",
+    "lib/**/*.js"
+  ],
   "dependencies": {
     "rxjs": "^6.4.0"
   },
