@@ -5,7 +5,7 @@
     "start": "jest --watch",
     "test": "jest",
     "build": "tsc",
-    "prepublishOnly": "tsc"
+    "prepublishOnly": "yarn run tsc"
   },
   "license": "MIT",
   "typings": "lib/index.d.ts",
