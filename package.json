@@ -7,6 +7,7 @@
     "build": "tsc"
   },
   "license": "MIT",
+  "typings": "lib/index.d.ts",
   "repository": "delta62/editcount",
   "devDependencies": {
     "@types/node": "^11.9.5",
@@ -15,8 +16,8 @@
     "typescript": "^3.3.3"
   },
   "files": [
-    "bin/**/*.js",
-    "lib/**/*.js"
+    "lib/**/*.js",
+    "lib/**/*.d.ts"
   ],
   "dependencies": {
     "rxjs": "^6.4.0"

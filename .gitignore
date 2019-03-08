@@ -1,3 +1,4 @@
 node_modules/
 lib/**/*.js
 /bin/index.js
+*.d.ts
