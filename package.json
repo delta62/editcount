@@ -1,10 +1,11 @@
 {
   "name": "@noedel/editcount",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "scripts": {
     "start": "jest --watch",
     "test": "jest",
-    "build": "tsc"
+    "build": "tsc",
+    "prepublishOnly": "tsc"
   },
   "license": "MIT",
   "typings": "lib/index.d.ts",
