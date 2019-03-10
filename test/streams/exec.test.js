@@ -4,24 +4,22 @@ const execStream = require('../../lib/streams/exec').default
 
 describe('execStream', () => {
   test('invokes the given command', async () => {
-    await execStream('command', [ 'arg1', 'arg2' ], { opt: 'opt' }).toPromise()
-    expect(cp.execFile).toHaveBeenCalledWith(
+    await execStream('command', [ 'arg1', 'arg2' ], { cwd: 'some/dir' }).toPromise()
+    expect(cp.spawn).toHaveBeenCalledWith(
       'command',
       [ 'arg1', 'arg2' ],
-      { opt: 'opt' },
-      expect.any(Function)
+      { cwd: 'some/dir' }
     )
   })
 
   test('emits next with stdout', async () => {
-    cp.__setMockResults(null, 'command results')
+    cp.__setMockResults(0, 'command results')
     let result = await execStream('command').toPromise()
     expect(result).toBe('command results')
   })
 
   test('emits error with command errors', async () => {
-    let err = new Error('Unable to run command')
-    cp.__setMockResults(err)
-    await expect(execStream('command').toPromise()).rejects.toThrow(err)
+    cp.__setMockResults(1)
+    await expect(execStream('command').toPromise()).rejects.toThrow()
   })
 })
