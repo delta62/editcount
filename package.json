@@ -5,10 +5,11 @@
     "start": "jest --watch",
     "test": "jest",
     "build": "tsc",
-    "prepublishOnly": "yarn run build"
+    "prepublishOnly": "npx tsc"
   },
   "license": "MIT",
   "typings": "lib/index.d.ts",
+  "main": "lib/index.js",
   "repository": "delta62/editcount",
   "devDependencies": {
     "@types/node": "^11.9.5",
