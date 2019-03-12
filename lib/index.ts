@@ -14,3 +14,5 @@ export default function edits(args: Args): Observable<FileDiff> {
     .pipe(flatMap(hash => diffStream(args, hash)))
     .pipe(map(getDiffFiles))
 }
+
+export { FileDiff }
