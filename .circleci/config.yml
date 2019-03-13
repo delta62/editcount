@@ -1,10 +1,10 @@
 version: 2.1
 
 executors:
-  - build-executor:
-      docker:
-        - image: circleci/node:10
-      working_directory: ~/repo
+  build-executor:
+    docker:
+      - image: circleci/node:10
+    working_directory: ~/repo
 
 jobs:
   build:
