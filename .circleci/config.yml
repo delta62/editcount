@@ -32,6 +32,9 @@ workflows:
   tagged-build:
     jobs:
       - build
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
       - publish:
           requires:
             - build
