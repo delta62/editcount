@@ -2,6 +2,16 @@ import diff from 'jest-diff'
 import { Observable, from, isObservable, zip } from 'rxjs'
 import { isEmpty, reduce, single } from 'rxjs/operators'
 
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toBeSingletonObservable(expected: any): Promise<CustomMatcherResult>
+      toBeEmptyObservable(): Promise<CustomMatcherResult>
+      toBeObservableWith(expected: any[]): Promise<CustomMatcherResult>
+    }
+  }
+}
+
 expect.extend({
   async toBeSingletonObservable<T>(this: jest.MatcherUtils, actual: Observable<T>, expected: T): Promise<jest.CustomMatcherResult> {
     if (!isObservable(actual)) {
