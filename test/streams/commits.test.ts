@@ -1,16 +1,15 @@
-require('../matchers/single-obs')
-const { from } = require('rxjs')
-const { isEmpty, single } = require('rxjs/operators')
+import '../matchers/single-obs'
+import { from } from 'rxjs'
 
 jest.mock('../../lib/streams/exec')
 
-const exec = require('../../lib/streams/exec').default
-const commitStream = require('../../lib/streams/commit').default
+import exec from '../../lib/streams/exec'
+import commitStream from '../../lib/streams/commit'
 
 describe('commitStream', async () => {
   test('should invoke git rev-list', async () => {
     exec.mockReturnValue(from([ '' ]))
-    await commitStream({ from: 'from-hash', to: 'to-hash' }).toPromise()
+    await commitStream({ from: 'from-hash', to: 'to-hash', cwd: '' }).toPromise()
 
     expect(exec).toHaveBeenCalledTimes(1)
     let callArgs = exec.mock.calls[0]
@@ -20,13 +19,13 @@ describe('commitStream', async () => {
 
   test('should stream no commits', async () => {
     exec.mockReturnValue(from([ '' ]))
-    let commits = commitStream({ from: 'from-hash', to: 'to-hash' })
+    let commits = commitStream({ from: 'from-hash', to: 'to-hash', cwd: '' })
     await expect(commits).toBeEmptyObservable()
   })
 
   test('should stream one commit', async () => {
     exec.mockReturnValue(from([ '8a6b02108fc1ff9feb30a6c0405fca9600f9a4a6' ]))
-    let commits = commitStream({ from: 'from-hash', to: 'to-hash' })
+    let commits = commitStream({ from: 'from-hash', to: 'to-hash', cwd: '' })
     await expect(commits).toBeSingletonObservable('8a6b02108fc1ff9feb30a6c0405fca9600f9a4a6')
   })
 
@@ -37,7 +36,7 @@ describe('commitStream', async () => {
       '621cc3b0d2fe11f6ac7d6f980c5aba9591d171bf'
     ]
     exec.mockReturnValue(from([ expected.join('\n') ]))
-    let commits = commitStream({ from: 'from-hash', to: 'to-hash' })
+    let commits = commitStream({ from: 'from-hash', to: 'to-hash', cwd: '' })
     await expect(commits).toBeObservableWith(expected)
   })
 })

@@ -1,9 +1,9 @@
-const diff = require('jest-diff')
-const { from, isObservable, zip } = require('rxjs')
-const { isEmpty, map, reduce, single } = require('rxjs/operators')
+import diff from 'jest-diff'
+import { Observable, from, isObservable, zip } from 'rxjs'
+import { isEmpty, reduce, single } from 'rxjs/operators'
 
 expect.extend({
-  async toBeSingletonObservable(actual, expected) {
+  async toBeSingletonObservable<T>(this: jest.MatcherUtils, actual: Observable<T>, expected: T): Promise<jest.CustomMatcherResult> {
     if (!isObservable(actual)) {
       return {
         message: () => 'toBeSingletonObservable called with a non-observable value',
@@ -11,18 +11,13 @@ expect.extend({
       }
     }
 
-    let options = {
-      isNot: this.isNot,
-      promise: this.promise
-    }
-
     let result = await singletonStream(actual)
     let pass = this.equals(result, expected)
 
-    let message
+    let message: string
     if (pass) {
       message = [
-        this.utils.matcherHint('toBeSingletonObservable', undefined, undefined, options),
+        this.utils.matcherHint('toBeSingletonObservable'),
         `Expected: ${this.utils.printExpected(expected)}`,
         `Received: ${this.utils.printReceived(actual)}`
       ].join('\n')
@@ -32,7 +27,7 @@ expect.extend({
       })
 
       message = [
-        this.utils.matcherHint('toBeSingletonObservable', undefined, undefined, options),
+        this.utils.matcherHint('toBeSingletonObservable'),
         difference
       ].join('\n')
     }
@@ -40,7 +35,7 @@ expect.extend({
     return { message: () => message, pass }
   },
 
-  async toBeEmptyObservable(actual) {
+  async toBeEmptyObservable(actual: Observable<any>) {
     if (!isObservable(actual)) {
       return {
         message: () => 'toBeEmptyObservable called with a non-observable value',
@@ -55,8 +50,7 @@ expect.extend({
     return { message: () => message, pass }
   },
 
-  async toBeObservableWith(actual, expected) {
-    expected = from(expected)
+  async toBeObservableWith<T>(this: jest.MatcherUtils, actual: Observable<T>, expected: T[]): Promise<jest.CustomMatcherResult> {
     if (!isObservable(actual)) {
       return {
         message: () => 'toBeEmptyObservable called with a non-observable value',
@@ -64,8 +58,9 @@ expect.extend({
       }
     }
 
-    let errorString = await zip(actual, expected)
-      .pipe(reduce((acc, [ x, y ]) => {
+    let expectedObs = from(expected)
+    let errorString = await zip(actual, expectedObs)
+      .pipe(reduce<[ T, T ], string>((acc, [ x, y ]) => {
         if (acc) return acc
         if (this.equals(x, y)) {
           return ''
@@ -83,6 +78,6 @@ expect.extend({
   }
 })
 
-async function singletonStream(stream) {
+async function singletonStream(stream: Observable<any>) {
   return await stream.pipe(single()).toPromise()
 }
