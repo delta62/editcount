@@ -14,6 +14,7 @@ export interface FileDiff {
   filename: string
   isCreated: boolean
   isDeleted: boolean
+  isRename: boolean
   additions: number
   deletions: number
 }

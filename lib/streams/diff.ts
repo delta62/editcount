@@ -6,9 +6,10 @@ import Args from '../args'
 import { FileChange } from '../models'
 
 const DIFF_MATCHER = /^diff --git.*\n$/
+const DIFF_FORMAT = '--format=%H%+ae%+an%+at'
 
 export default function diffStream(progArgs: Args, hash: string): Observable<FileChange> {
-  let args = [ 'show', '--format=%H%+ae%+an%+at', hash ]
+  let args = [ 'show', DIFF_FORMAT, hash ]
   let opts = { cwd: progArgs.cwd, timeout: 5 }
   return (execStream('git', args, opts) as Observable<string>)
     .pipe(flatMap(mapDiffFiles))

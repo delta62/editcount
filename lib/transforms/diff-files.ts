@@ -11,6 +11,7 @@ export default function getDiffFiles(diff: FileChange): FileDiff {
     deletions: 0,
     isCreated: false,
     isDeleted: false,
+    isRename: false,
     plusFile: '',
     minusFile: ''
   }
@@ -22,6 +23,8 @@ export default function getDiffFiles(diff: FileChange): FileDiff {
         acc.plusFile = matches[1]
       } else if (matches = line.match(TRIPLE_MINUS)) {
         acc.minusFile = matches[1]
+      } else if (/^rename/.test(line)) {
+        acc.isRename = true
       } else if (/^\+/.test(line)) {
         acc.additions++
       } else if (/^-/.test(line)) {
@@ -30,17 +33,22 @@ export default function getDiffFiles(diff: FileChange): FileDiff {
       return acc
     }, seed)
 
-  let { additions, deletions } = fileStats
+  let { authorEmail, authorName, hash, timestamp } = diff
+  let { additions, deletions, isRename } = fileStats
   let isCreated = fileStats.minusFile === DEVNULL
   let isDeleted = fileStats.plusFile === DEVNULL
   let filename = isCreated ? fileStats.plusFile : fileStats.minusFile
 
   return {
-    ...diff,
     additions,
+    authorEmail,
+    authorName,
     deletions,
+    filename,
+    hash,
     isCreated,
     isDeleted,
-    filename
+    isRename,
+    timestamp
   }
 }
