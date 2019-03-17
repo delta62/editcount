@@ -8,7 +8,7 @@
     "prepublishOnly": "yarn run build"
   },
   "license": "MIT",
-  "typings": "lib/index.d.ts",
+  "typings": "index.d.ts",
   "main": "lib/index.js",
   "repository": "delta62/editcount",
   "devDependencies": {
