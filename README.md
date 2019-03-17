@@ -6,7 +6,7 @@ Break git commits into a stream of metadata objects, like this:
 
 ``` javascript
 {
-  hash: "",
+  hash: "8a6b02108fc1ff9feb30a6c0405fca9600f9a4a6",
   authorName: "Sam Noedel",
   authorEmail: "sam.noedel@example.com",
   timestamp: 123456789,
@@ -27,6 +27,9 @@ If you want to invoke the library from the command line, check out [@noedel/comm
 ```
 yarn add @noedel/editcount
 ```
+
+:warning: Always validate the options of this library! It is invoking the `git` command via `child_process.spawn`,
+so you should be absolutely certain the inputs are safe to run. :warning:
 
 With an rxjs observable:
 
