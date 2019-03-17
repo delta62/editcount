@@ -1,5 +1,6 @@
 import { Observable } from 'rxjs'
 import { flatMap, map } from 'rxjs/operators'
+import { Readable } from 'stream'
 
 import Args from './args'
 import validate from './arg-validator'
@@ -15,4 +16,20 @@ export default function edits(args: Args): Observable<FileDiff> {
     .pipe(map(getDiffFiles))
 }
 
-export { FileDiff }
+export function editStream(args: Args): Readable {
+  let readable = new Readable({
+    highWaterMark: 25,
+    objectMode: true
+  })
+
+  edits(args)
+    .subscribe(
+      data => readable.push(data),
+      err => readable.emit('error', err),
+      () => readable.push(null)
+    )
+
+  return readable
+}
+
+export { FileDiff, edits as editObservable }
