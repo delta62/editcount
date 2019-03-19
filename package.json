@@ -4,24 +4,23 @@
   "scripts": {
     "start": "jest --watch",
     "test": "jest",
-    "build": "yarn run tsc && yarn run npm-dts generate",
+    "build": "yarn run tsc",
     "prepublishOnly": "yarn run build"
   },
   "license": "MIT",
-  "typings": "index.d.ts",
+  "typings": "lib/index.d.ts",
   "main": "lib/index.js",
   "repository": "delta62/editcount",
   "devDependencies": {
     "@types/jest": "^24.0.11",
     "@types/node": "^11.9.5",
     "jest": "^24.1.0",
-    "npm-dts": "^1.1.8",
     "ts-jest": "^24.0.0",
     "typescript": "^3.3.3"
   },
   "files": [
     "lib/**/*.js",
-    "index.d.ts"
+    "lib/**/*.d.ts"
   ],
   "dependencies": {
     "rxjs": "^6.4.0"
